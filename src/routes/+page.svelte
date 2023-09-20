@@ -75,7 +75,7 @@
         left: 0px;
         display: flex;
         justify-content: space-between;
-        font-size:1.2rem;
+        font-size:1.2em;
         font-family: 'DotGothic16', sans-serif;
 	}
     .loader {
@@ -96,17 +96,37 @@
     }
 
     .distance {
-        line-height: 64px;
-        width: 128px;
-        font-size: 1rem;
+        width: 90px;
+        font-size: 0.6em;
+        flex: none;
+        display: flex;
+        align-content: flex-end;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
     }
 
     .name {
-        line-height: 64px;
+        width:50%;
+        text-align: left;
+        display: flex;
+        align-content: center;
+        flex-wrap: wrap;
     }
 
     .mapLink {
         width: 64px;
+        display: flex;
+        align-content: center;
+        flex-wrap: wrap;
+    }
+
+    .mapLink a {
+        display: flex;
+        align-content: center;
+        flex-wrap: wrap;
+        flex-direction: column;
     }
 
 </style>
