@@ -21,5 +21,5 @@ export function haversineDistance (a:any, b:any) {
   const bLng = toRad(Array.isArray(b) ? b[0] : b.longitude ?? b.lng ?? b.lon)
 
   const ht = hav(bLat - aLat) + cos(aLat) * cos(bLat) * hav(bLng - aLng)
-  return 2 * R * asin(sqrt(ht))
+  return Math.floor(2 * R * asin(sqrt(ht))/10)/100
 }
