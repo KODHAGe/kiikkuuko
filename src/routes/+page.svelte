@@ -4,28 +4,34 @@
     import { haversineDistance } from "$lib/haversine";
     import '@fontsource/dotgothic16';
 
-    let coords = []
+    let coords = [],
+        places = {}
+
     onMount(async () => {
-        if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            coords = position.coords
-        });
+        let localData = localStorage.getItem("places");
+        if (!localData) {
+            const response = await fetch(`https://api.hel.fi/servicemap/v2/unit/?
+            format=json
+            &geometry=true
+            &include=service_nodes%2Cservices%2Caccessibility_properties%2Cdepartment%2Croot_department&language=fi
+            &only=street_address%2Clocation%2Cname%2Cmunicipality%2Caccessibility_shortcoming_count%2Cservice_nodes%2Ccontract_type%2Corganizer_type
+            &page=1
+            &page_size=1000
+            &service_node=499`)
+            places = await response.json()
+            localStorage.setItem("places", JSON.stringify(places))
         } else {
-        /* geolocation IS NOT available */
+            places = JSON.parse(localData)
+        }
+
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                coords = position.coords
+            });
+        } else {
+            /* geolocation IS NOT available */
         }
     })
-    
-    const getLeikkipuistot = (async () => {
-        const response = await fetch(`https://api.hel.fi/servicemap/v2/unit/?
-        format=json
-        &geometry=true
-        &include=service_nodes%2Cservices%2Caccessibility_properties%2Cdepartment%2Croot_department&language=fi
-        &only=street_address%2Clocation%2Cname%2Cmunicipality%2Caccessibility_shortcoming_count%2Cservice_nodes%2Ccontract_type%2Corganizer_type
-        &page=1
-        &page_size=1000
-        &service_node=499`)
-        return await response.json()
-    })()
 
     const orderData = (results, coords) => {
         if (coords.length != 0) {
@@ -36,7 +42,6 @@
                     result.distance = 666
                 }
             })
-
             return results.sort((a,b) => {
                 return a.distance - b.distance
             })
@@ -44,14 +49,10 @@
             return results
         }
     }
-</script>
 
-{#await getLeikkipuistot}
-    <div class="loader" out:fade={{ duration: 100 }}>
-        <img src="/images/kiikkuuko.gif" alt="loading image with cool swing" class="loaderImg"/>
-    </div>
-{:then data}
-	{#each orderData(data.results, coords) as result}
+</script>
+{#if places.results}
+    {#each orderData(places.results, coords) || [] as result }
     <div class="row" in:fade={{ delay: 101, duration: 100 }}>
         <p class="distance">{#if result.distance != null}~ {result.distance} km{/if}</p> 
         <p class="name">{result.name.fi}</p>
@@ -64,10 +65,11 @@
         </p>
     </div>
     {/each}
-{:catch error}
-	<p>An error occurred!</p>
-{/await}
-
+{:else}
+    <div class="loader" out:fade={{ duration: 100 }}>
+        <img src="/images/kiikkuuko.gif" alt="loading image with cool swing" class="loaderImg"/>
+    </div>
+{/if}
 <style>
 	.row {
         border-bottom: solid #eee 1px;
